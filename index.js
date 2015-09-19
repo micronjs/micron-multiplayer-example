@@ -1,3 +1,3 @@
 require('dotenv').load();
 
-require('./src').startServer(3000);
+require('./src').startServer(process.env.PORT || 3000);
