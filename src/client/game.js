@@ -1,3 +1,5 @@
+var primus = Primus.connect();
+
 var Loader = State.extend({
     draw : function()
     {
@@ -35,13 +37,21 @@ var GameList = State.extend({
         var fadeTo = { r: 0, g: 0, b: 0, a: 0 };
 
         Camera.fade(fadeFrom, fadeTo, 1);
+    },
 
-        this.button = new Button('/assets/img/empty.jpg', 500, 350, this.onNewGameClick.bind(this));
-        this.button.text = new Label('New game');
+    init : function()
+    {
+        this.button = new Button('button', 100, 100, this.onNewGameClick.bind(this));
+        this.add(this.button);
     },
 
     onNewGameClick: function () {
-        console.log('CLICK');
+        primus.write({
+            type: 'createGame',
+            payload: {
+                name: 'MyGame ' + Math.floor(Math.random() * 100)
+            }
+        });
     },
 
     updateList: function (list) {
@@ -50,32 +60,36 @@ var GameList = State.extend({
 
     draw : function()
     {
-        this.callParent();
+        if (!this.button) {
+            this.init();
+        }
 
         Graphics.drawFullScreenRect(this.bgr.r, this.bgr.g, this.bgr.b, 1.0);
-        this.drawGameList();
+        this.callParent();
 
-        this.button.draw();
+        this.drawGameList();
     },
 
     drawGameList: function () {
-        Graphics.drawText('List of games:', 50, 50, 1, 1, 1, 1, 24, 'Arial');
+        Graphics.drawText('List of games:', 150, 150, 1, 1, 1, 1, 24, 'Arial');
 
         var name;
         for (var i = 0; i < this.list.length; i++) {
             name = this.list[i].name;
 
-            Graphics.drawText(name, 80, 50 + (i + 1) * 30, 1, 1, 1, 1, 24, 'Arial');
+            Graphics.drawText(name, 180, 150 + (i + 1) * 30, 1, 1, 1, 1, 24, 'Arial');
         }
     }
 });
 
 Core.init(640, 480);
 Core.setState(new Loader());
-Core.addAsset([	'empty', '/assets/img/empty.jpg' ]);
+Core.addAsset([
+    'empty', '/assets/img/empty.jpg',
+    'button', '/assets/img/button.png'
+]);
 Core.loadAndRun();
 
-var primus = Primus.connect();
 var gamesLoaded;
 
 primus.on('open', function (spark) {

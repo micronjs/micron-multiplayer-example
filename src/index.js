@@ -6,9 +6,6 @@ var initPrimus = require('./primus.init');
 function GameServer(primus) {
     this.primus = primus;
     this.games = [];
-
-    this.createGame('Ala');
-    this.createGame('ma kota');
 }
 
 GameServer.prototype.initialize = function () {
@@ -24,7 +21,16 @@ GameServer.prototype.initialize = function () {
                 spark.write({
                     type: 'games',
                     payload: scope.games
-                })
+                });
+            }
+
+            if (message.type === 'createGame') {
+                scope.createGame(message.payload.name);
+
+                spark.write({
+                    type: 'games',
+                    payload: scope.games
+                });
             }
         });
     });
