@@ -1,0 +1,30 @@
+{
+  "name": "micron-multiplayer-example",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ertrzyiks/micron-multiplayer-example.git"
+  },
+  "author": "ertrzyiks <mateusz.derks@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ertrzyiks/micron-multiplayer-example/issues"
+  },
+  "homepage": "https://github.com/ertrzyiks/micron-multiplayer-example",
+  "dependencies": {
+    "consolidate": "git://github.com/ertrzyiks/consolidate.js",
+    "debug": "^2.2.0",
+    "dotenv": "^1.2.0",
+    "express": "^4.13.3",
+    "micronjs": "git://github.com/micronjs/micronjs",
+    "nunjucks": "^2.0.0",
+    "primus": "^3.2.3",
+    "ws": "^0.8.0"
+  }
+}

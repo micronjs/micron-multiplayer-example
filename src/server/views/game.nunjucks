@@ -1,0 +1,16 @@
+{% extends "layout.nunjucks" %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="/assets/lib/micronjs/base.js"></script>
+  <script src="/assets/lib/micronjs/micron.min.js"></script>
+  <script src="/assets/js/game.js"></script>
+{% endblock %}
+
+{% block content %}
+  <h1>Micron multiplayer example</h1>
+
+  <div id="the_game"></div>
+{% endblock %}
+
+

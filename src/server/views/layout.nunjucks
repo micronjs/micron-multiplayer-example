@@ -1,0 +1,20 @@
+<html>
+<head>
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+  {% block body %}
+    {% block content %}
+    {% endblock %}
+
+    {% block scripts %}
+      <script src="/assets/lib/primus.generated.js"></script>
+
+      {% for script in scripts %}
+          <script src="{{ script }}"></script>
+      {% endfor %}
+    {% endblock %}
+  {% endblock %}
+</body>
+</html>
