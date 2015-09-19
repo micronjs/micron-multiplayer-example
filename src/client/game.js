@@ -13,12 +13,14 @@ var Loader = State.extend({
 
 var Game = State.extend({
     bgr : null,
+    playerId: null,
     player: null,
     position: null,
 
-    constructor : function(list) {
+    constructor : function(playerId) {
         this.callParent();
 
+        this.playerId = playerId;
         this.player = { x: 20, y: 20 };
         this.positions = [];
 
@@ -29,6 +31,10 @@ var Game = State.extend({
         this.positions = [];
 
         for (var id in players) {
+            if (id == this.playerId) {
+                continue;
+            }
+
             this.positions.push(players[id].position);
         }
     },
@@ -83,14 +89,20 @@ Core.addAsset([
 ]);
 Core.loadAndRun();
 
-primus.on('open', function (spark) {
-    Core.setState(new Game());
+primus.on('open', function () {
+    primus.id(function (id) {
+        var playerId = id;
+
+        Core.setState(new Game(playerId));
+
+        primus.on('data', function (message) {
+            if (message.type === 'players') {
+                if (Core.currentState instanceof Game) {
+                    Core.currentState.setPlayerPositions(message.payload);
+                }
+            }
+        });
+    });
 });
 
-primus.on('data', function (message) {
-    if (message.type === 'players') {
-        if (Core.currentState instanceof Game) {
-            Core.currentState.setPlayerPositions(message.payload);
-        }
-    }
-});
+
