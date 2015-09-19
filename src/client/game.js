@@ -11,76 +11,69 @@ var Loader = State.extend({
     }
 });
 
-var FetchingGames = State.extend({
-    draw : function()
-    {
-        this.callParent();
-
-        Graphics.drawFullScreenRect(0, 0, 0, 1.0);
-
-        Graphics.drawText('Fetching game list...', 150, 250, 1, 1, 1, 1, 24, 'Arial');
-    }
-});
-
-var GameList = State.extend({
-    list : null,
+var Game = State.extend({
     bgr : null,
-    button : null,
-    constructor : function(list)
-    {
+    player: null,
+    position: null,
+
+    constructor : function(list) {
         this.callParent();
 
-        this.list = list || [];
-        this.bgr = { r: 0.2, g: 0.2, b: 0.5 };
+        this.player = { x: 20, y: 20 };
+        this.positions = [];
 
-        var fadeFrom = { r: 0, g: 0, b: 0, a: 1 };
-        var fadeTo = { r: 0, g: 0, b: 0, a: 0 };
-
-        Camera.fade(fadeFrom, fadeTo, 1);
+        this.bgr = {r: 0.2, g: 0.2, b: 0.5};
     },
 
-    init : function()
+    setPlayerPositions: function (players) {
+        this.positions = [];
+
+        for (var id in players) {
+            this.positions.push(players[id].position);
+        }
+    },
+
+    update : function(delta)
     {
-        this.button = new Button('button', 100, 100, this.onNewGameClick.bind(this));
-        this.add(this.button);
-    },
+        this.callParent(delta);
 
-    onNewGameClick: function () {
+        if (Input.isKeyPressed(Input.KEY_A)) {
+            this.player.x -= 1;
+        }
+
+        if (Input.isKeyPressed(Input.KEY_D)) {
+            this.player.x += 1;
+        }
+
+        if (Input.isKeyPressed(Input.KEY_W)) {
+            this.player.y -= 1;
+        }
+
+        if (Input.isKeyPressed(Input.KEY_S)) {
+            this.player.y += 1;
+        }
+
         primus.write({
-            type: 'createGame',
-            payload: {
-                name: 'MyGame ' + Math.floor(Math.random() * 100)
-            }
+            type: 'myposition',
+            payload: this.player
         });
     },
 
-    updateList: function (list) {
-        this.list = list;
-    },
-
-    draw : function()
-    {
-        if (!this.button) {
-            this.init();
-        }
-
+    draw : function() {
         Graphics.drawFullScreenRect(this.bgr.r, this.bgr.g, this.bgr.b, 1.0);
-        this.callParent();
 
-        this.drawGameList();
-    },
-
-    drawGameList: function () {
-        Graphics.drawText('List of games:', 150, 150, 1, 1, 1, 1, 24, 'Arial');
-
-        var name;
-        for (var i = 0; i < this.list.length; i++) {
-            name = this.list[i].name;
-
-            Graphics.drawText(name, 180, 150 + (i + 1) * 30, 1, 1, 1, 1, 24, 'Arial');
+        var pos;
+        for (var i = 0; i < this.positions.length; i++) {
+            pos = this.positions[i];
+            Graphics.drawRect(pos.x, pos.y, 30, 30, 1, 0, 0, 0.2);
         }
+
+        Graphics.drawRect(this.player.x, this.player.y, 30, 30, 0, 0, 1, 0.7);
+        this.callParent();
     }
 });
+
+
 
 Core.init(640, 480);
 Core.setState(new Loader());
@@ -90,26 +83,14 @@ Core.addAsset([
 ]);
 Core.loadAndRun();
 
-var gamesLoaded;
-
 primus.on('open', function (spark) {
-    Core.setState(new FetchingGames());
-
-    gamesLoaded = false;
-
-    primus.write({
-        type: 'getListOfGames'
-    });
+    Core.setState(new Game());
 });
 
 primus.on('data', function (message) {
-   if (message.type === 'games') {
-       if (!gamesLoaded) {
-           gamesLoaded = true;
-
-           Core.setState(new GameList(message.payload));
-       } else if (Core.currentState instanceof GameList){
-           Core.currentState.updateList(message.payload);
-       }
-   }
+    if (message.type === 'players') {
+        if (Core.currentState instanceof Game) {
+            Core.currentState.setPlayerPositions(message.payload);
+        }
+    }
 });

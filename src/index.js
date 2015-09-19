@@ -5,7 +5,7 @@ var initPrimus = require('./primus.init');
 
 function GameServer(primus) {
     this.primus = primus;
-    this.games = [];
+    this.players = {};
 }
 
 GameServer.prototype.initialize = function () {
@@ -15,33 +15,39 @@ GameServer.prototype.initialize = function () {
         debug('CONNECTION');
 
         spark.on('data', function (message) {
+            var playerId, gameName;
+
             debug('Incoming message:' + message.type);
 
-            if (message.type === 'getListOfGames') {
-                spark.write({
-                    type: 'games',
-                    payload: scope.games
-                });
+            if (message.type === 'myposition') {
+                playerId = spark.id;
+
+                scope.updatePosition(playerId, message.payload);
             }
 
-            if (message.type === 'createGame') {
-                scope.createGame(message.payload.name);
-
-                spark.write({
-                    type: 'games',
-                    payload: scope.games
-                });
-            }
         });
     });
 
     this.primus.on('disconnection', function (spark) {
         debug('DISCONNECTION');
+
+        var playerId = spark.id;
+        scope.disconnect(playerId);
     });
 };
 
-GameServer.prototype.createGame = function (name) {
-    this.games.push({ name: name });
+GameServer.prototype.updatePosition = function (playerId, position) {
+    this.players[playerId] = this.players[playerId] || {};
+    this.players[playerId].position = position;
+
+    this.primus.write({
+        type: 'players',
+        payload: this.players
+    });
+};
+
+GameServer.prototype.disconnect = function (playerId) {
+    delete this.players[playerId];
 };
 
 exports.startServer = function (port) {
