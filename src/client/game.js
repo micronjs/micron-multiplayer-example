@@ -84,8 +84,7 @@ var Game = State.extend({
 Core.init(640, 480);
 Core.setState(new Loader());
 Core.addAsset([
-    'empty', '/assets/img/empty.jpg',
-    'button', '/assets/img/button.png'
+    'empty', '/assets/img/empty.jpg'
 ]);
 Core.loadAndRun();
 
