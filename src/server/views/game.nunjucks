@@ -9,8 +9,6 @@
 
 {% block content %}
   <h1>Micron multiplayer example</h1>
-
-  <div id="the_game"></div>
 {% endblock %}
 
 
